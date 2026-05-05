@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermes Agent 的学术场景应用 · 安装、使用与风险控制</title>
+<style>
+  :root {
+    --primary: #1e293b;
+    --accent: #2563eb;
+    --accent-light: #e8f0fe;
+    --sidebar-bg: #1e293b;
+    --sidebar-text: #cbd5e1;
+    --sidebar-active: #2563eb;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --code-bg: #1e293b;
+    --warn-bg: #7c2d12;
+    --green: #059669;
+    --amber: #d97706;
+    --red: #dc2626;
+    --sidebar-width: 260px;
+    --header-height: 56px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 15px;
+  }
+  .header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--header-height);
+    background: var(--sidebar-bg);
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-left: calc(var(--sidebar-width) + 16px);
+    transition: margin-left 0.3s;
+  }
+  .header .badge {
+    background: rgba(255,255,255,0.12);
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 11px;
+    margin-left: 12px;
+    color: #94a3b8;
+  }
+  .menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px;
+    margin-left: -4px;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    width: var(--sidebar-width);
+    bottom: 0;
+    background: var(--sidebar-bg);
+    overflow-y: auto;
+    z-index: 90;
+    padding: 12px 0;
+    transition: transform 0.3s;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+  .sidebar .section-label {
+    padding: 16px 20px 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+  }
+  .sidebar a {
+    display: block;
+    padding: 7px 20px 7px 24px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: 13px;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .sidebar a:hover {
+    background: rgba(255,255,255,0.06);
+    color: white;
+  }
+  .sidebar a.active {
+    background: rgba(37,99,235,0.15);
+    border-left-color: var(--sidebar-active);
+    color: #93c5fd;
+  }
+  .sidebar a.sub {
+    padding-left: 36px;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  /* Main */
+  .main {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--header-height);
+    padding: 40px 48px 80px;
+    max-width: 920px;
+    background: rgba(248, 250, 252, 0.92);
+    min-height: calc(100vh - var(--header-height));
+  }
+
+  /* Cover */
+  .cover {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+    padding: 64px 48px 48px;
+    border-radius: 12px;
+    margin-bottom: 40px;
+  }
+  .cover h1 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .cover .subtitle {
+    font-size: 15px;
+    color: #94a3b8;
+    margin-bottom: 20px;
+  }
+  .cover .meta {
+    font-size: 13px;
+    color: #64748b;
+  }
+  .cover .meta span {
+    display: inline-block;
+    margin-right: 24px;
+  }
+  .cover .risk-badge {
+    display: inline-block;
+    background: #dc2626;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+
+  /* Chapters */
+  .chapter {
+    margin-bottom: 56px;
+  }
+  .chapter-header {
+    margin-bottom: 24px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid var(--accent);
+  }
+  .chapter-header .number {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .chapter-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .chapter-header .desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 28px 0 12px;
+    padding-left: 12px;
+    border-left: 3px solid var(--accent);
+    scroll-margin-top: 72px;
+  }
+  h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 20px 0 10px;
+  }
+  p {
+    margin-bottom: 14px;
+    color: var(--text-secondary);
+  }
+  ul, ol {
+    margin-bottom: 14px;
+    padding-left: 20px;
+    color: var(--text-secondary);
+  }
+  li {
+    margin-bottom: 6px;
+  }
+  strong { color: var(--text); font-weight: 600; }
+
+  /* Code */
+  pre {
+    background: var(--code-bg);
+    color: #e2e8f0;
+    padding: 18px 20px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 16px 0;
+    font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+  }
+  pre .comment { color: #64748b; font-style: italic; }
+  pre .keyword { color: #818cf8; }
+  pre .string { color: #34d399; }
+  code:not(pre code) {
+    background: #f1f5f9;
+    color: #dc2626;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-family: "JetBrains Mono", Consolas, monospace;
+  }
+
+  /* Step card */
+  .step-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 14px 0;
+  }
+  .step-card .step-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .step-card .step-title .num {
+    display: inline-block;
+    width: 24px; height: 24px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+  .step-card .step-body {
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+
+  /* Callout */
+  .callout {
+    padding: 16px 20px;
+    border-radius: 6px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .callout-info { background: var(--accent-light); border-left: 4px solid var(--accent); color: #1e40af; }
+  .callout-warn { background: #fffbeb; border-left: 4px solid var(--amber); color: #92400e; }
+  .callout-tip { background: #f0fdf4; border-left: 4px solid var(--green); color: #065f46; }
+  .callout-danger { background: #fef2f2; border-left: 4px solid var(--red); color: #991b1b; }
+
+  /* Method card */
+  .method-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 20px 0;
+    border-left: 4px solid var(--accent);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .method-card .method-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .method-card .method-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 2px 0 8px;
+    width: 100%;
+  }
+  .method-card .tool-tag {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  /* Tables */
+  .tool-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .tool-table th {
+    background: var(--primary);
+    color: white;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+  }
+  .tool-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  .tool-table tr:nth-child(even) td { background: var(--bg); }
+
+  /* Prompt box */
+  .prompt-box {
+    background: #f0f4ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 13px;
+    color: #1e40af;
+    line-height: 1.7;
+    position: relative;
+  }
+  .prompt-box::before {
+    content: "Prompt";
+    position: absolute;
+    top: -10px;
+    left: 12px;
+    background: var(--accent);
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 10px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+  }
+
+  /* Risk cards */
+  .risk-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 14px 0;
+    border-left: 4px solid var(--red);
+  }
+  .risk-card .risk-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--red);
+    margin-bottom: 8px;
+  }
+  .risk-card .risk-body {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .risk-card .risk-example {
+    background: #fef2f2;
+    border: 1px dashed #fca5a5;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #991b1b;
+    line-height: 1.6;
+  }
+
+  /* Check list */
+  .check-list {
+    list-style: none;
+    padding: 0;
+  }
+  .check-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list .check-icon {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .check-list .check-icon.required { background: var(--red); color: white; }
+  .check-list .check-icon.suggest { background: var(--amber); color: white; }
+  .check-list .check-text { flex: 1; color: var(--text-secondary); font-size: 14px; }
+  .check-list .check-text strong { color: var(--text); }
+
+  /* Utils */
+  hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+
+  .footer {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-muted);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    top: var(--header-height);
+    left: var(--sidebar-width);
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), #7c3aed);
+    z-index: 99;
+    width: 0;
+    transition: width 0.2s;
+  }
+
+  /* Scroll buttons */
+  .scroll-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 40px; height: 40px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    display: none;
+    z-index: 99;
+  }
+  .scroll-top:hover { background: #334155; }
+
+  .img-wrapper {
+    margin: 18px 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .img-wrapper img {
+    width: 100%;
+    display: block;
+    max-height: 300px;
+    object-fit: contain;
+    background: #0f172a;
+    padding: 20px;
+  }
+  .img-wrapper .caption {
+    padding: 8px 16px;
+    background: #f1f5f9;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 860px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .menu-toggle { display: block; }
+    .header h1 { margin-left: 12px; font-size: 14px; }
+    .main { margin-left: 0; padding: 24px 18px; }
+    .cover { padding: 40px 24px; }
+    .cover h1 { font-size: 24px; }
+    .progress-bar { left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <button class="menu-toggle" id="menuToggle">☰</button>
+  <h1>Hermes Agent · 学术场景</h1>
+  <span class="badge">交流分享</span>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <div class="section-label">安装与配置</div>
+  <a onclick="scrollToId('intro')">1. 背景与定位</a>
+  <a onclick="scrollToId('install-wsl')">2. 环境准备（WSL2）</a>
+  <a onclick="scrollToId('install-hermes')">3. Hermes 安装</a>
+  <a onclick="scrollToId('config')">4. 首次配置</a>
+
+  <div class="section-label">使用场景</div>
+  <a onclick="scrollToId('scenes')">5. 学术写作四大场景</a>
+  <a onclick="scrollToId('scene-grant')" class="sub">5.1 标书修改</a>
+  <a onclick="scrollToId('scene-paper')" class="sub">5.2 论文润色</a>
+  <a onclick="scrollToId('scene-review')" class="sub">5.3 综述整合</a>
+  <a onclick="scrollToId('scene-stats')" class="sub">5.4 统计结果描述</a>
+  <a onclick="scrollToId('tips')">6. Prompt 技巧</a>
+  <a onclick="scrollToId('advanced')">7. 进阶功能</a>
+
+  <div class="section-label">风险控制</div>
+  <a onclick="scrollToId('risks')">8. AI 的局限性与风险</a>
+  <a onclick="scrollToId('risk-hallucination')" class="sub">8.1 幻觉</a>
+  <a onclick="scrollToId('risk-confidence')" class="sub">8.2 自信语气陷阱</a>
+  <a onclick="scrollToId('risk-ethics')" class="sub">8.3 学术伦理边界</a>
+  <a onclick="scrollToId('risk-privacy')" class="sub">8.4 数据隐私</a>
+  <a onclick="scrollToId('risk-checklist')" class="sub">8.5 核查清单</a>
+
+  <div class="section-label">参考</div>
+  <a onclick="scrollToId('faq')">9. 常见问题</a>
+  <a onclick="scrollToId('refs')">10. 参考资源</a>
+
+  <div style="padding: 20px; margin-top: 12px; border-top: 1px solid #334155; font-size: 11px; color: #64748b; text-align: center;">
+    内容整理：邓炯斌<br>参考：Nous Research Hermes Agent
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+
+<!-- Cover -->
+<div class="cover">
+  <h1>Hermes Agent 的学术场景应用</h1>
+  <p class="subtitle">安装使用入门 · 四大常见场景 · AI 的局限性与风险控制</p>
+  <div class="meta">
+    <span>2026年5月</span>
+    <span>邓炯斌</span>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- 第一部分 -->
+<!-- ============================================ -->
+<div class="chapter">
+
+  <div class="chapter-header">
+    <div class="number">第一部分</div>
+    <h2>背景、安装与配置</h2>
+    <p class="desc">Hermes Agent 是什么，为什么适合学术写作场景，以及如何装好它。</p>
+  </div>
+
+  <h3 id="intro">1. 背景与定位</h3>
+
+  <p><strong>Hermes Agent</strong> 是由 Nous Research 构建的自主 AI 代理。你下发一次任务，它就能自主完成需求分析、代码生成、检查修复、文件操作等全流程。</p>
+
+  <p>多数人接触 AI 辅助学术写作时，第一反应是用 ChatGPT 或 Claude 的网页版——把标书段落粘贴进去，让 AI 改，再把结果粘出来。这个过程对短段落没问题，但如果你的需求是：</p>
+  <ul>
+    <li>一次处理多个章节，保持全文风格统一</li>
+    <li>把你偏好的写作规范（如"避免第一人称"、"参考文献用 Vancouver 格式"）记录下来，每次自动沿用</li>
+    <li>让 AI 在后台跑任务，你去干别的事，干完通知你</li>
+  </ul>
+  <p>网页版对话就有点不够用了。Hermes Agent 能做的正是这些——通过命令行一次下发任务，自动完成从读取文件到输出修改结果的全流程，而且每次对话都在积累，不是用完就丢。</p>
+
+  <div class="callout callout-info">
+    <strong>一句话定义：</strong>Hermes Agent 是一个在终端（命令行）中运行的 AI 助手。你告诉它做什么，它自己调用工具、读写文件、检查结果、修复错误。你不需要每一步都手动操作。
+  </div>
+
+  <div class="img-wrapper" style="margin-bottom: 20px;">
+    <img src="hermes_terminal.png" alt="Hermes Agent 终端交互界面" style="border-radius: 8px;">
+    <div class="caption">Hermes Agent 终端界面——在命令行中与 AI 对话，下发学术写作任务</div>
+  </div>
+
+  <p><strong>它与网页版 AI 的区别：</strong></p>
+  <table class="tool-table">
+    <tr><th style="width:28%">对比项</th><th>ChatGPT / Claude 网页版</th><th>Hermes Agent</th></tr>
+    <tr><td><strong>操作方式</strong></td><td>手动复制粘贴，一段一段处理</td><td>下发任务后自动处理整份文件</td></tr>
+    <tr><td><strong>多文件处理</strong></td><td>逐一粘贴</td><td>一次读取目录中多个文件</td></tr>
+    <tr><td><strong>记忆偏好</strong></td><td>每次新对话需重新说明</td><td>跨会话记住你的写作习惯</td></tr>
+    <tr><td><strong>可复用规范</strong></td><td>需每次都描述一遍</td><td>可存成 Skills，一键调用</td></tr>
+    <tr><td><strong>平台扩展</strong></td><td>Web 端或 App</td><td>可接微信/Telegram 远程使用</td></tr>
+  </table>
+
+  <p><strong>适合用 Hermes 干的学术写作类工作：</strong></p>
+  <ul>
+    <li>标书语言的语气调整（从口语化到正式）</li>
+    <li>论文段落的逻辑梳理与润色</li>
+    <li>多篇文献摘要的整合与综述段落生成</li>
+    <li>统计结果（均数±标准差、P 值等）转写成文字描述</li>
+    <li>参考文献格式的批量转换和校对</li>
+  </ul>
+
+  <p><strong>不适合用 Hermes 干的：</strong></p>
+  <ul>
+    <li>数据分析和统计计算（Hermes 可以通过 terminal 执行 Python 脚本做真实计算，但需要环境中安装了相应的统计库，且输出需要人工核验）</li>
+    <li>文献真实性验证（它不会主动去 PubMed 查论文是否存在，需要你明确指令并自行核对结果）</li>
+    <li>图片内容分析（需要传给支持多模态的模型完成，Hermes 本身的工具链可以调用 vision 能力，但不是默认工作模式）</li>
+  </ul>
+
+  <hr>
+
+  <h3 id="install-wsl">2. 环境准备：WSL2（仅 Windows 需要）</h3>
+
+  <p>Hermes Agent 不支持原生 Windows，需要在 Linux 环境下运行。如果你用的是 macOS 或 Linux，跳过这一步。Windows 用户需要安装 WSL2（Windows Subsystem for Linux），也就是 Windows 内置的 Linux 子系统。</p>
+
+  <h4>安装方法（二选一）</h4>
+  <p><strong>方案 A（推荐，最简单）：</strong>打开微软商店（Microsoft Store），搜索 "Ubuntu"，点击安装。装完后从开始菜单启动 Ubuntu，等待初始化完成，设置用户名和密码即可。</p>
+
+  <p><strong>方案 B（命令行）：</strong>以管理员身份打开 PowerShell 或命令提示符，运行：</p>
+  <pre>wsl --install</pre>
+  <p>这条命令会自动启用 WSL2 并安装 Ubuntu。完成后重启电脑。</p>
+
+  <h4>WSL2 终端的基本操作</h4>
+  <ul>
+    <li><strong>粘贴命令：</strong>在 WSL 终端中，右键单击即可粘贴（不是 Ctrl+V）</li>
+    <li><strong>访问 Windows 文件：</strong>Windows 的 C 盘在 WSL 中的路径是 <code>/mnt/c/</code>，D 盘是 <code>/mnt/d/</code>。例如 <code>ls /mnt/c/Users/你的用户名/Desktop/</code> 可以看到桌面文件</li>
+    <li><strong>文件编辑：</strong>可以用 <code>nano 文件名</code> 打开简易文本编辑器，编辑完后 Ctrl+X 退出，按提示保存</li>
+    <li><strong>退出终端：</strong>输入 <code>exit</code> 或直接关掉窗口。下次打开 WSL 还是在同一个环境</li>
+  </ul>
+
+  <div class="callout callout-tip">
+    <strong>一点说明：</strong>如果你完全没接触过命令行，不用紧张。后续安装 Hermes 只需要复制粘贴一行命令，日常使用也只涉及输入一两句话让 AI 干活。不需要学 Linux 命令。
+  </div>
+
+  <hr>
+
+  <h3 id="install-hermes">3. Hermes 安装</h3>
+
+  <p>打开 WSL 终端（Windows）或系统终端（macOS/Linux），粘贴并执行以下命令：</p>
+
+  <pre>curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash</pre>
+
+  <p>安装脚本会自动处理以下内容：</p>
+  <ul>
+    <li>安装依赖（Python、Node.js、ripgrep 等系统工具）</li>
+    <li>克隆 Hermes Agent 仓库</li>
+    <li>创建 Python 虚拟环境并安装依赖包</li>
+    <li>设置全局 <code>hermes</code> 命令</li>
+  </ul>
+  <p>整个过程大约 1-2 分钟，取决于网络速度。</p>
+
+  <p><strong>安装完成后：</strong></p>
+  <pre>source ~/.bashrc   # 如果用 zsh 则: source ~/.zshrc
+hermes             # 启动 Hermes 对话</pre>
+
+  <p>首次运行 <code>hermes</code> 时会进入配置向导（见下一节）。</p>
+
+  <div class="callout callout-warn">
+    <strong>如果安装过程中出现网络超时或连接失败：</strong>国内网络访问 GitHub 可能不稳定，可以尝试切换网络（如手机热点），或稍后重试。目前 Hermes 的安装脚本没有国内镜像，如果多次失败，可以考虑先配置 Git 代理或使用 VPN。
+  </div>
+
+  <hr>
+
+  <h3 id="config">4. 首次配置</h3>
+
+  <p>首次运行 <code>hermes</code> 会进入交互式配置界面，核心步骤是选择并配置 LLM 提供商。</p>
+
+  <h4>选择提供商</h4>
+  <p>学术写作场景的推荐搭配：</p>
+  <table class="tool-table">
+    <tr><th>提供商</th><th>推荐模型</th><th>适合场景</th><th>成本</th></tr>
+    <tr><td><strong>Anthropic Claude</strong></td><td>Claude Sonnet</td><td>标书修改、论文润色（业界评价较高）</td><td>按量计费</td></tr>
+    <tr><td><strong>DeepSeek</strong></td><td>deepseek-v4-flash</td><td>日常润色、格式整理（性价比高）</td><td>有免费额度</td></tr>
+    <tr><td><strong>SiliconFlow</strong></td><td>多种开源模型</td><td>测试、轻量任务</td><td>注册送额度</td></tr>
+    <tr><td><strong>OpenRouter</strong></td><td>多模型聚合</td><td>需要灵活切换不同模型</td><td>按量计费</td></tr>
+  </table>
+
+  <h4>配置步骤</h4>
+  <ol>
+    <li>去对应提供商的官网注册账号</li>
+    <li>在 API 管理页面创建 API Key</li>
+    <li>在 <code>hermes setup</code> 中选择提供商，填入 API Key</li>
+    <li>填入模型名称（如 <code>claude-sonnet-4</code> 或 <code>deepseek-v4-flash</code>）</li>
+  </ol>
+
+  <p>配置完成后，输入 <code>hermes</code> 进入对话界面，可以试着丢一句话验证：</p>
+
+  <div class="prompt-box">把这段标书摘要改得更正式、更适合投国自然：<br>"我们想研究腰椎间盘突出症的保守治疗方法，看看哪种效果比较好，之前的研究都各说各的，没有统一结论。"</div>
+
+  <p>如果输出正常，说明配置成功。如果感觉质量不满意，可以用 <code>hermes model</code> 切换到其他模型重试。</p>
+
+</div>
+
+<!-- ============================================ -->
+<!-- 第二部分 -->
+<!-- ============================================ -->
+<div class="chapter">
+
+  <div class="chapter-header">
+    <div class="number">第二部分</div>
+    <h2>使用场景</h2>
+    <p class="desc">四个常见学术写作场景的 prompt 示例，可以直接复制使用。</p>
+  </div>
+
+  <h3 id="scenes">5. 学术写作四大场景</h3>
+
+  <h4 id="scene-grant">5.1 场景一：标书修改</h4>
+  <p>标书写作的核心需求是语气调整和逻辑梳理。通常你已经有初稿或过往标书的素材，需要让 AI 在保持原意的基础上优化表达。</p>
+
+  <div class="prompt-box">请修改下面这段标书的研究背景，要求：<br>1. 保持所有事实和数据不变<br>2. 语气调整为正式、客观的学术风格<br>3. 在"目前研究现状"和"本研究拟解决的问题"之间加一个过渡段落<br>4. 不要添加新的参考文献<br><br>[粘贴你的标书段落]</div>
+
+  <div class="callout callout-tip">
+    <strong>说明：</strong>prompt 中明确"不要添加新参考文献"很重要——AI 倾向于自己编一些听起来合理但不存在的引用。后面风险控制部分会详细讲这个问题。
+  </div>
+
+  <h4 id="scene-paper">5.2 场景二：论文润色</h4>
+  <p>写好的论文初稿可能存在逻辑跳跃、表述冗余、中式英语等问题。AI 适合做的是理顺句子、优化用词、调整段落衔接。</p>
+
+  <div class="prompt-box">请润色以下论文讨论部分：<br>1. 保持所有论点和参考文献不变<br>2. 重点理顺段落之间的逻辑过渡<br>3. 检查是否有重复表述，合并冗余内容<br>4. 语气保持本领域的学术惯例，不要过度包装<br>5. 如果发现逻辑问题或不一致，请标注出来让我确认，不要擅自修改<br><br>[粘贴论文段落]</div>
+
+  <div class="callout callout-warn">
+    <strong>注意：</strong>要求 AI "标注问题让我确认"而不是"直接修改"——这条可以有效防止 AI 在你不知情的情况下编造内容来填补逻辑空缺。
+  </div>
+
+  <h4 id="scene-review">5.3 场景三：综述整合</h4>
+  <p>在写综述或标书立项依据时，需要把多篇文献的摘要整合成一段连贯的文字。这个任务的关键是时间线梳理和引用标注。</p>
+
+  <div class="prompt-box">下面是我从几篇文献中提取的关键信息，请帮我整合成一段连贯的综述段落：<br>1. 按发表年份从早到晚排列<br>2. 每个文献引用在对应的句子后面标注 [1][2] 等编号<br>3. 在段落末尾添加一段总结：当前研究的共识和仍存在的争议<br>4. 如果发现我提供的某项信息可能存在矛盾或争议，请标注出来<br><br>[粘贴文献摘要，每段注明来源]</div>
+
+  <h4 id="scene-stats">5.4 场景四：统计结果描述</h4>
+  <p>很多同行在写论文结果部分时，不知道如何把统计软件的输出转写成规范的学术语言。AI 可以处理这个转换，前提是你给它准确的数值。</p>
+
+  <div class="prompt-box">根据以下统计结果，写出论文结果部分的一段描述，要求符合本领域医学论文的写作惯例：<br><br>分组：对照组（n=30） vs 治疗组（n=30）<br>指标：VAS 疼痛评分<br>对照组治疗前：6.2±1.8，治疗后：3.5±1.5<br>治疗组治疗前：6.4±1.7，治疗后：1.8±1.2<br>组间比较：t=4.87，P=0.008<br><br>注意：不要改动任何数字，只负责写成通顺的文字描述。<br><span style="color:#64748b;font-size:12px;">（以上数据为虚构示例，请替换为你的实际统计输出）</span></div>
+
+  <hr>
+
+  <h3 id="tips">6. Prompt 技巧</h3>
+
+  <p>AI 输出的质量，很大程度上取决于你输入的 prompt 质量。以下四个原则可以贴在桌边对照：</p>
+
+  <table class="tool-table" style="font-size: 13px;">
+    <tr><th style="width:14%">原则</th><th style="width:33%">❌ 模糊写法</th><th style="width:33%">✅ 有效写法</th><th style="width:20%">为什么</th></tr>
+    <tr>
+      <td><strong>具体化</strong></td>
+      <td>"帮我改一下这段话"</td>
+      <td>"帮我把这段讨论改得更简洁，每句话控制在 25 个字以内"</td>
+      <td>AI 不知道你要怎么改。给明确边界，输出才可控</td>
+    </tr>
+    <tr>
+      <td><strong>给上下文</strong></td>
+      <td>"润色这段标书"</td>
+      <td>"这是标书研究背景部分，读者是临床专家，语气保持客观，我前三段已经定稿了，这是第四段"</td>
+      <td>一段话的润色效果取决于 AI 对整体背景的了解程度</td>
+    </tr>
+    <tr>
+      <td><strong>迭代修改</strong></td>
+      <td>一次期望完美输出</td>
+      <td>先出第一版，再说"第三段语气太生硬""第一个论点加个过渡句"</td>
+      <td>迭代修改的质量远高于一次性指令。人类改稿也是这么做的</td>
+    </tr>
+    <tr>
+      <td><strong>贴回去改</strong></td>
+      <td>"整体不太行，重写"（AI 不知道哪里不行）</td>
+      <td>把不满意的句子单独贴回去："这句逻辑不对，换个说法，别改其他部分"</td>
+      <td>告诉 AI 具体哪里不对，它才能修到点上。整体重写可能引入新问题</td>
+    </tr>
+  </table>
+
+  <div class="callout callout-info">
+    <strong>容易踩的坑：</strong>"帮我写一段标书立项依据"——这种空泛的指令会让 AI 自由发挥，你拿到手的很可能是一段看似专业但内容经不起推敲的文字。更好的做法是先自己写一个骨架，让 AI 在框架内帮你优化表达。
+  </div>
+
+  <hr>
+
+  <h3 id="advanced">7. 进阶功能</h3>
+
+  <p>以下功能按需使用，不一定要一开始就用上。</p>
+
+  <h4>Memory（跨会话记忆）</h4>
+  <p>你可以告诉 AI 一次你的偏好，它在后续的对话中会自动沿用。比如你说了"我习惯用客观表述，避免'首次发现'这类措辞"，之后每次润色它都会注意这一点。不需要每次重复说明。</p>
+
+  <h4>Skills（固化常用操作）</h4>
+  <p>如果你有一些经常重复的修改规范——比如"国自然标书风格：语气正式、多用被动语态、突出创新性和临床意义"——可以把它存成一个 Skill。下次直接说"按国自然风格改这段"，AI 就会按之前设定的规范执行，不需要重新描述一遍。</p>
+
+  <h4>微信/Telegram 远程使用</h4>
+  <p>Hermes 可以部署到微信或 Telegram 上。你在手机上发一段文字，Agent 在云端 VPS 上执行，干完了通知你。对临床场景来说，在手机上看看进度、收个通知比守在电脑前方便。</p>
+
+</div>
+
+<!-- ============================================ -->
+<!-- 第三部分：风险控制 — 重点章节 -->
+<!-- ============================================ -->
+<div class="chapter">
+
+  <div class="chapter-header" id="risks">
+    <div class="number">第三部分</div>
+    <h2>AI 的局限性与风险控制</h2>
+    <p class="desc">这一部分最重要。AI 的能力很有趣，但它的缺陷对学术写作来说是致命的。请认真阅读。</p>
+  </div>
+
+  <!-- 8.1 -->
+  <h3 id="risk-hallucination">8.1 幻觉：AI 会编东西，而且编得跟真的一样</h3>
+
+  <p>语言模型的本质是"根据上文预测下一个最合理的词"，它没有能力区分"真实存在的信息"和"听起来合理但不存在的信息"。当它遇到知识空白或不确定的内容时，不会停下去查资料，而是基于概率生成一段看起来合理的文字——这就是幻觉。</p>
+
+  <div class="risk-card">
+    <div class="risk-title">典型例一：编造参考文献</div>
+    <div class="risk-body">
+      <p>让 AI "在立项依据中添加几篇近五年的文献支撑"，它可能生成这样的结果：</p>
+      <div class="risk-example">
+        "Smith J, et al. Lumbar disc herniation outcomes after conservative treatment: a systematic review. Spine J. 2024;24(3):412-420."<br><br>
+        这篇论文可能不存在。作者名、期刊名、卷号、页码看起来完全合理——但去 PubMed 一查，根本没有这篇。AI 只是把常见的论文格式拼凑在了一起。
+      </div>
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <div class="risk-title">典型例二：编造统计结果</div>
+    <div class="risk-body">
+      <p>让 AI "根据这项研究描述写出结果部分"，即使你没有给它任何原始数据，它也可能写出：</p>
+      <div class="risk-example">
+        "治疗组与对照组在治疗后 VAS 评分差异有统计学意义（t=3.24，P=0.002），表明治疗组疗效优于对照组。"<br><br>
+        AI 并不知道 P 值是多少——它只是觉得"这里应该有一个 P 值"，然后根据上下文生成了一个看起来合理但不存在的数值。
+      </div>
+    </div>
+  </div>
+
+  <h4>为什么这对学术写作特别危险</h4>
+  <p>一段包含幻觉的标书或论文，在通读时可能发现不了问题——逻辑通顺、格式规范、语气专业。但一旦进入评审或同行评议阶段，一个不存在的引用就能让整份材料的可信度归零。对于标书评审来说，评审专家很可能恰好了解自己领域内的文献，一眼就能看出这个引用的真假。</p>
+
+  <!-- 8.2 -->
+  <h3 id="risk-confidence">8.2 自信语气陷阱：AI 对不确定的信息同样自信</h3>
+
+  <p>这是比幻觉更深层的问题。AI 不会说"我不确定"或"这段是我猜的"。它用完全相同的语气输出事实和编造的内容——前后都是"研究表明""数据显示""据文献报道"。作为人类读者，你无法从语气上区分哪些是真的、哪些是 AI 脑补的。</p>
+
+  <div class="callout callout-danger">
+    <strong>这是学术场景最危险的点：</strong>AI 的自信语气会传染幻觉给使用者。一段读起来很专业的文字，可能包含多处未经核实的信息——而使用者可能因此相信这些信息是真的，进一步基于这些信息做出决策、修改标书、或者引用到自己的论文中。在一次错误的信息上堆砌更多的工作，代价比 AI 不帮忙大得多。
+  </div>
+
+  <p><strong>应对方法只有一个：</strong>所有 AI 输出的内容，涉及事实、数据、引用、统计的地方，都必须人工核实。把 AI 当成一个"可能包含错误的初稿提供者"，而不是"可信的信息源"。</p>
+
+  <!-- 8.3 -->
+  <h3 id="risk-ethics">8.3 学术伦理边界</h3>
+
+  <p>AI 辅助学术写作的伦理边界，目前各期刊和基金机构的政策不完全一致。以下是大致分类：</p>
+
+  <table class="tool-table">
+    <tr><th>使用方式</th><th>伦理风险</th><th>常见政策</th></tr>
+    <tr><td>AI 辅助润色（改写、调语气、纠语法）</td><td>低</td><td>多数期刊允许，需在致谢中声明</td></tr>
+    <tr><td>AI 辅助翻译（中译英、英译中）</td><td>中</td><td>需注明 AI 参与，作者需核验准确性</td></tr>
+    <tr><td>AI 生成内容（让 AI "写一段标书立项依据"）</td><td>高</td><td>部分期刊明确禁止，视为代写</td></tr>
+    <tr><td>AI 作为合著者</td><td>全部禁止</td><td>所有主流期刊均不允许将 AI 列为作者</td></tr>
+  </table>
+
+  <p>使用前建议查阅目标期刊或基金的 AI 使用政策（Nature、The Lancet、国自然等都有明确说明）。一般来说，在方法部分或致谢中说明使用了 AI 工具辅助语言表达，是安全且负责任的做法。</p>
+
+  <!-- 8.4 -->
+  <h3 id="risk-privacy">8.4 数据隐私</h3>
+
+  <ul>
+    <li><strong>标书和未发表数据在传输过程中经过 API 服务器：</strong>你在 Hermes 中粘贴的内容会被发送到你选择的 LLM 提供商（OpenAI、Anthropic、DeepSeek 等）。不同提供商的隐私条款存在差异——部分承诺不将 API 数据用于模型训练（如 Anthropic、OpenAI 的企业 API），另一些则未做明确承诺。传输和存储过程中仍存在泄露风险，请根据你选用的提供商查阅其服务协议。</li>
+    <li><strong>建议做法：</strong>涉及患者隐私、未公开的研究数据、有竞争力的标书内容，先做脱敏处理（用"某医院"替代医院名称、用"患者 A"替代真实姓名），让 AI 处理文字框架，人工补回具体信息</li>
+    <li><strong>API Key 安全：</strong>不要将 API Key 写死在代码或截图中，不要在公开场合分享 Key。泄露的 Key 可能被他人盗用产生大量费用</li>
+  </ul>
+
+  <!-- 8.5 -->
+  <h3 id="risk-checklist">8.5 每次使用 AI 后的核查清单</h3>
+
+  <p>以下清单建议打印出来，每次从 AI 拿到输出后逐条核对：</p>
+
+  <ul class="check-list">
+    <li>
+      <div class="check-icon required">必</div>
+      <div class="check-text"><strong>每一条参考文献都去查 DOI 确认存在</strong><br>不要只看格式是否规范，要看这篇论文是否真实存在。PubMed 或 Google Scholar 搜一下作者名和标题，确认能找到</div>
+    </li>
+    <li>
+      <div class="check-icon required">必</div>
+      <div class="check-text"><strong>每一个统计数字回原始数据验证</strong><br>AI 写的"P=0.03"和"P=0.3"在语气上没有区别，但在学术意义上完全不同。所有数值结果必须从原始统计输出中核对</div>
+    </li>
+    <li>
+      <div class="check-icon required">必</div>
+      <div class="check-text"><strong>每一句"首次发现/首次报告/据我们所知"查文献支撑</strong><br>这类声称是审稿人重点审查的对象。确认是否真是首次，如果不确定，删掉或改为温和表述</div>
+    </li>
+    <li>
+      <div class="check-icon suggest">选</div>
+      <div class="check-text"><strong>检查 AI 是否添加了你未提供的数据</strong><br>对比 AI 输出和你给的原始内容，看有没有多出你根本没给它的数字、年份、人名</div>
+    </li>
+    <li>
+      <div class="check-icon suggest">选</div>
+      <div class="check-text"><strong>检查是否有过度包装的表述</strong><br>AI 倾向使用"显著的""突破性的""革新性的"这类词汇，在学术写作中通常需要降级或删除</div>
+    </li>
+  </ul>
+
+  <div class="callout callout-danger">
+    <strong>核心原则：</strong>AI 负责处理"怎么写"（表达层面的优化），人类负责"写什么"（内容的真实性、准确性和原创性）。<br><br>
+    ✅ "帮我改写这段话，意思不变，语气调正式" — 范围可控，结果可验证<br>
+    ❌ "帮我写一段标书立项依据" — AI 自由发挥空间太大，输出中可能包含大量未经核实的内容<br><br>
+    把 AI 当成一个非常聪明但偶尔会胡说八道的助手——你需要核实它说的每一句涉及事实的话。
+  </div>
+
+</div>
+
+<!-- ============================================ -->
+<!-- 第四部分 -->
+<!-- ============================================ -->
+<div class="chapter">
+
+  <div class="chapter-header">
+    <div class="number">第四部分</div>
+    <h2>参考与补充</h2>
+  </div>
+
+  <h3 id="faq">9. 常见问题</h3>
+
+  <div class="step-card">
+    <div class="step-title">网络超时或连不上</div>
+    <div class="step-body">
+      检查网络连接。国内访问 GitHub 和部分 API 提供商可能不稳定，可以尝试切换网络（手机热点），或换用国内可用的提供商（如 SiliconFlow、DeepSeek）。
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title">配置填错了想重来</div>
+    <div class="step-body">
+      重新运行 <code>hermes setup</code>，按提示重新选择提供商和填写 API Key 即可。
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title">越用越慢，响应变迟钝</div>
+    <div class="step-body">
+      当前会话的上下文太长。退出后重新启动 <code>hermes</code> 开始新会话。如果你想保留之前的对话，可以在退出前把关键内容保存下来。
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title">输出质量忽高忽低</div>
+    <div class="step-body">
+      不同模型在不同任务上的表现差异很大。标书修改类任务建议用 Claude 系列，日常润色用 DeepSeek 性价比更高。如果某个模型的输出质量持续不理想，用 <code>hermes model</code> 切换到其他模型试试。
+    </div>
+  </div>
+
+  <hr>
+
+  <h3 id="refs">10. 参考资源</h3>
+
+  <table class="tool-table">
+    <tr><th style="width:22%">资源</th><th>说明</th></tr>
+    <tr>
+      <td><strong>Hermes 官方文档</strong><br><code>hermes-agent.nousresearch.com/docs</code></td>
+      <td>完整的使用指南，包括安装、配置、高级功能、API 参考等。遇到问题优先查这里。</td>
+    </tr>
+    <tr>
+      <td><strong>Hermes GitHub 仓库</strong><br><code>github.com/NousResearch/hermes-agent</code></td>
+      <td>开源仓库。可以查看 Issues 了解已知问题，或提交 Bug 报告。</td>
+    </tr>
+    <tr>
+      <td><strong>Easy-Vibe（Datawhale）</strong><br><code>datawhalechina.github.io/easy-vibe</code></td>
+      <td>中文 Vibe Coding 课程，涵盖 AI IDE、AI Agent、多模态等工具的操作教程。其中的 AI 对话技巧部分对写 prompt 有帮助。</td>
+    </tr>
+    <tr>
+      <td><strong>各期刊 AI 使用政策</strong></td>
+      <td>Nature、The Lancet、NEJM、PLOS 等均在其作者指南中明确说明了 AI 的使用范围和声明要求。投稿前务必查阅目标期刊的官方政策。</td>
+    </tr>
+  </table>
+
+</div>
+
+</div><!-- /main -->
+
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="footer">
+  邓炯斌 · Hermes Agent 的学术场景应用 · 2026
+</div>
+
+<script>
+// 侧边栏切换
+document.getElementById('menuToggle').addEventListener('click', function() {
+  document.getElementById('sidebar').classList.toggle('open');
+});
+
+// 侧边栏滚动到指定锚点
+function scrollToId(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  if (window.innerWidth <= 860) {
+    document.getElementById('sidebar').classList.remove('open');
+  }
+}
+
+// 滚动进度条 + 回到顶部按钮
+window.addEventListener('scroll', function() {
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = (window.scrollY / docHeight) * 100;
+  document.getElementById('progressBar').style.width = progress + '%';
+
+  const btn = document.getElementById('scrollTop');
+  btn.style.display = progress > 30 ? 'block' : 'none';
+});
+
+// 高亮当前侧边栏项
+const sections = ['intro','install-wsl','install-hermes','config','scenes','scene-grant','scene-paper','scene-review','scene-stats','tips','advanced','risks','risk-hallucination','risk-confidence','risk-ethics','risk-privacy','risk-checklist','faq','refs'];
+const sidebarLinks = document.querySelectorAll('.sidebar a');
+
+window.addEventListener('scroll', function() {
+  let current = '';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top <= 120) current = id;
+    }
+  });
+
+  // 父级自动匹配：如果子项被激活（如 risk-hallucination），父级（risks）也高亮
+  const parentMap = {
+    'scene-grant': 'scenes', 'scene-paper': 'scenes', 'scene-review': 'scenes', 'scene-stats': 'scenes',
+    'risk-hallucination': 'risks', 'risk-confidence': 'risks', 'risk-ethics': 'risks',
+    'risk-privacy': 'risks', 'risk-checklist': 'risks'
+  };
+  const activeParent = parentMap[current] || current;
+
+  sidebarLinks.forEach(link => {
+    link.classList.remove('active');
+    const onclick = link.getAttribute('onclick');
+    if (onclick) {
+      // 匹配当前 section 或父级
+      if (onclick.includes(current) || onclick.includes(activeParent)) {
+        link.classList.add('active');
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
